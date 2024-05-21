@@ -2,11 +2,12 @@ const canvas = document.getElementById("canvas-1");
 const ctx = canvas.getContext("2d");
 
 let particles = [];
-let initial_count = 50;
+let initial_count = 10;
 let min_speed = 1, max_speed = 10;
 let min_size = 5, max_size = 50;
 
 let animationRequest = null;
+let isCollisionDetect = true;
 
 function random(min, max) {
 	return Math.floor(Math.random() * (max - min) + 1) + min;
@@ -68,9 +69,31 @@ function init() {
 	animate();
 }
 
+function collisionDetection() {
+	let length = particles.length
+	for (let i = 0; i < length; i++) {
+		for (let j = i + 1; j < length; j++) {
+			let dx = particles[i].x - particles[j].x;
+			let dy = particles[i].y - particles[j].y;
+			let distance = Math.sqrt(dx * dx + dy * dy);
+
+			if ((distance - particles[i].size - particles[j].size) <= 0) {
+				particles[i].velX *= -1;
+				particles[i].velY *= -1;
+				particles[j].velX *= -1;
+				particles[j].velY *= -1;
+			}
+		}
+	}
+}
+
 function animate() {
 	ctx.fillStyle = `rgb(0 0 0 / 40%)`;
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+	if (isCollisionDetect) {
+		collisionDetection();
+	}
 	for (let i = 0; i < particles.length; i++) {
 		particles[i].move();
 		particles[i].draw();
